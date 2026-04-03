@@ -6,81 +6,46 @@ Converts a pasted AI news summary into a fully-produced 30–40 minute podcast f
 
 ## Prerequisites
 
-- **Node.js** 22.16 or newer (Node 24 recommended)
 - **Python 3** 3.10 or newer
-- **npm**, **pnpm**, or **bun**
 - An [ElevenLabs](https://elevenlabs.io) API key
-- An AI model provider API key configured in openclaw (OpenAI, Anthropic, etc.)
 
 ---
 
-## 1. Install openclaw
+## Installation
 
-```bash
-npm install -g openclaw@latest
-```
+### 1. Install the skill
 
-Verify the installation:
-
-```bash
-openclaw doctor
-```
-
-If `openclaw` is not found after installation, add the npm global bin directory to your `PATH`:
-
-```bash
-export PATH="$PATH:$(npm config get prefix)/bin"
-```
-
-Add that line to your `~/.bashrc` or `~/.zshrc` to make it permanent.
-
----
-
-## 2. Configure openclaw
-
-Run the interactive setup wizard:
-
-```bash
-openclaw onboard --install-daemon
-```
-
-This walks you through connecting your AI model provider and installs a background daemon so openclaw starts automatically.
-
-To configure your provider and model manually, edit `~/.openclaw/openclaw.json`. See the [openclaw configuration docs](https://docs.openclaw.ai/gateway/configuration-examples) for the full reference.
-
----
-
-## 3. Install this skill
-
-### From GitHub
+**From GitHub:**
 
 ```bash
 clawhub clone pcjtse/openclaw-podcast-skills
 clawhub install ./openclaw-podcast-skills
 ```
 
-### From a local checkout
+**From a local checkout:**
 
 ```bash
 git clone https://github.com/pcjtse/openclaw-podcast-skills.git
 clawhub install ./openclaw-podcast-skills
 ```
 
-### Development mode (changes picked up automatically)
+**Development mode (changes picked up automatically):**
 
 ```bash
 clawhub install ./openclaw-podcast-skills --dev
 ```
 
----
+### 2. Install Python dependencies
 
-## 4. Configure your ElevenLabs API key
+```bash
+pip install -r scripts/requirements.txt
+```
 
-Add your ElevenLabs API key to `openclaw.json`. The skill's Python scripts read from this file automatically.
+### 3. Configure your ElevenLabs API key
+
+Add your ElevenLabs API key to `openclaw.json`. The skill reads from this file automatically.
 
 **Option A — skill working directory** (takes priority):
-
-Create `openclaw.json` in the directory where you run openclaw:
 
 ```json
 {
@@ -100,7 +65,7 @@ Add the key to `~/.openclaw/openclaw.json`:
 
 > **Security note:** Do not commit `openclaw.json` containing API keys to version control. Add it to `.gitignore`.
 
-### Optional: customise host voices
+#### Optional: customise host voices
 
 By default the skill uses four pre-selected ElevenLabs voices. Override any of them in `openclaw.json`:
 
@@ -118,29 +83,11 @@ Browse available voice IDs at [elevenlabs.io/voice-library](https://elevenlabs.i
 
 ---
 
-## 5. Install Python dependencies
-
-The audio generation scripts require a few Python packages:
-
-```bash
-pip install -r scripts/requirements.txt
-```
-
----
-
-## 6. Start openclaw
-
-```bash
-openclaw gateway --port 18789
-```
-
----
-
 ## Usage
 
 Invoke the skill by pasting your AI news summary into the openclaw chat. The text can be in any readable format (Markdown, plain text, newsletter copy) as long as it includes article headlines, summaries, and source URLs.
 
-**Example invocation:**
+**Example:**
 
 ```
 /ai-news-podcast
@@ -187,8 +134,6 @@ output/
 
 | Problem | Solution |
 |---------|----------|
-| `openclaw: command not found` | Add npm global bin to `PATH` (see step 1) |
-| `ELEVENLABS_API_KEY is not set` | Add the key to `openclaw.json` (see step 4) |
+| `ELEVENLABS_API_KEY is not set` | Add the key to `openclaw.json` (see step 3) |
 | Audio segments generated but no final MP3 | Run `python3 scripts/mix_audio.py ./output/segments/ ./output/podcast.mp3` manually |
 | Script is under 4,500 words | Ask the skill to expand the deep-dive discussions before generating audio |
-| `clawhub: command not found` | Run `npm install -g openclaw@latest` again — `clawhub` is bundled with openclaw |
