@@ -4,7 +4,7 @@ description: "Converts a pasted AI news summary (with article URLs) into a 30-40
 version: 1.0.0
 metadata:
   openclaw:
-    env:
+    config:
       - ELEVENLABS_API_KEY
     bins:
       - python3
@@ -142,7 +142,15 @@ python3 scripts/generate_audio.py ./output/script.txt
 
 This will create numbered MP3 segments in `./output/segments/` and a `./output/segments/segments.json` file recording which segment indices correspond to `[SEGMENT:]` boundaries.
 
-If `ELEVENLABS_API_KEY` is not set, stop and inform the user that the environment variable must be configured before audio generation can proceed.
+If `generate_audio.py` exits with an error about `ELEVENLABS_API_KEY`, stop and inform the user that the key must be added to `openclaw.json` before audio generation can proceed:
+
+```json
+{
+  "ELEVENLABS_API_KEY": "your-key-here"
+}
+```
+
+Place this file in the skill's working directory or at `~/.openclaw/openclaw.json`.
 
 ### Step 6: Mix Final Podcast
 
@@ -164,14 +172,25 @@ Tell the user:
 
 ## Voice Configuration
 
-The `generate_audio.py` script uses these default ElevenLabs voice IDs, which can be overridden by setting environment variables:
+The `generate_audio.py` script uses these default ElevenLabs voice IDs. Override any of them by adding the key to `openclaw.json` (or as an environment variable as a fallback):
 
-| Host | Env Var | Default Voice ID | Default Voice |
-|------|---------|-----------------|---------------|
+| Host | Config Key | Default Voice ID | Default Voice |
+|------|-----------|-----------------|---------------|
 | ALEX | `ALEX_VOICE_ID` | `21m00Tcm4TlvDq8ikWAM` | Rachel |
 | JORDAN | `JORDAN_VOICE_ID` | `pNInz6obpgDQGcFmaJgB` | Adam |
 | SAM | `SAM_VOICE_ID` | `TxGEqnHWrfWFTfGW9XjX` | Josh |
 | MORGAN | `MORGAN_VOICE_ID` | `EXAVITQu4vr4xnSDxMaL` | Bella |
+
+Example `openclaw.json`:
+```json
+{
+  "ELEVENLABS_API_KEY": "your-key-here",
+  "ALEX_VOICE_ID": "21m00Tcm4TlvDq8ikWAM",
+  "JORDAN_VOICE_ID": "pNInz6obpgDQGcFmaJgB",
+  "SAM_VOICE_ID": "TxGEqnHWrfWFTfGW9XjX",
+  "MORGAN_VOICE_ID": "EXAVITQu4vr4xnSDxMaL"
+}
+```
 
 ---
 

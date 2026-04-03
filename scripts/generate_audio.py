@@ -26,16 +26,50 @@ from pathlib import Path
 from elevenlabs.client import ElevenLabs
 
 # ---------------------------------------------------------------------------
-# Voice configuration — override any of these via environment variables
+# Config loading — reads from openclaw.json, falls back to environment vars
+# ---------------------------------------------------------------------------
+
+def load_openclaw_config() -> dict:
+    """
+    Load settings from openclaw.json.
+
+    Search order:
+      1. ./openclaw.json           (skill working directory)
+      2. ~/.openclaw/openclaw.json (user-level openclaw config)
+
+    Returns an empty dict if neither file exists.
+    """
+    candidates = [
+        Path("openclaw.json"),
+        Path.home() / ".openclaw" / "openclaw.json",
+    ]
+    for path in candidates:
+        if path.is_file():
+            try:
+                return json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as e:
+                print(f"WARNING: Could not read {path}: {e}", flush=True)
+    return {}
+
+
+def get_config(key: str, config: dict, default: str | None = None) -> str | None:
+    """Return a value from openclaw.json config, falling back to env var then default."""
+    return config.get(key) or os.getenv(key) or default
+
+
+_config = load_openclaw_config()
+
+# ---------------------------------------------------------------------------
+# Voice configuration — from openclaw.json, then env vars, then hardcoded defaults
 # ---------------------------------------------------------------------------
 VOICE_IDS = {
-    "ALEX":   os.getenv("ALEX_VOICE_ID",   "21m00Tcm4TlvDq8ikWAM"),  # Rachel
-    "JORDAN": os.getenv("JORDAN_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),  # Adam
-    "SAM":    os.getenv("SAM_VOICE_ID",    "TxGEqnHWrfWFTfGW9XjX"),  # Josh
-    "MORGAN": os.getenv("MORGAN_VOICE_ID", "EXAVITQu4vr4xnSDxMaL"),  # Bella
+    "ALEX":   get_config("ALEX_VOICE_ID",   _config, "21m00Tcm4TlvDq8ikWAM"),  # Rachel
+    "JORDAN": get_config("JORDAN_VOICE_ID", _config, "pNInz6obpgDQGcFmaJgB"),  # Adam
+    "SAM":    get_config("SAM_VOICE_ID",    _config, "TxGEqnHWrfWFTfGW9XjX"),  # Josh
+    "MORGAN": get_config("MORGAN_VOICE_ID", _config, "EXAVITQu4vr4xnSDxMaL"),  # Bella
 }
 
-MODEL_ID = os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2")
+MODEL_ID = get_config("ELEVENLABS_MODEL_ID", _config, "eleven_multilingual_v2")
 OUTPUT_FORMAT = "mp3_44100_128"
 SEGMENTS_DIR = Path("./output/segments")
 
@@ -116,9 +150,15 @@ def main() -> None:
         print(f"ERROR: Script file not found: {script_path}", file=sys.stderr)
         sys.exit(1)
 
-    api_key = os.getenv("ELEVENLABS_API_KEY")
+    api_key = get_config("ELEVENLABS_API_KEY", _config)
     if not api_key:
-        print("ERROR: ELEVENLABS_API_KEY environment variable is not set.", file=sys.stderr)
+        print(
+            "ERROR: ELEVENLABS_API_KEY is not set.\n"
+            "Add it to openclaw.json (skill directory or ~/.openclaw/openclaw.json):\n"
+            '  { "ELEVENLABS_API_KEY": "your-key-here" }\n'
+            "Or set it as an environment variable.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     SEGMENTS_DIR.mkdir(parents=True, exist_ok=True)
