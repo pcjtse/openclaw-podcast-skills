@@ -15,24 +15,8 @@ Converts a pasted AI news summary into a fully-produced 30–40 minute podcast f
 
 ### 1. Install the skill
 
-**From GitHub:**
-
-```bash
-clawhub clone pcjtse/openclaw-podcast-skills
-clawhub install ./openclaw-podcast-skills
-```
-
-**From a local checkout:**
-
 ```bash
 git clone https://github.com/pcjtse/openclaw-podcast-skills.git
-clawhub install ./openclaw-podcast-skills
-```
-
-**Development mode (changes picked up automatically):**
-
-```bash
-clawhub install ./openclaw-podcast-skills --dev
 ```
 
 ### 2. Install Python dependencies
